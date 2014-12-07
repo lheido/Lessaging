@@ -17,14 +17,16 @@ public class ConversationsList {
 
     private static ArrayList<Conversation> list;
     private static boolean isFirstLoaded;
+    private static int i;
 
     public static void load(final Context context, final ConversationsListCallback callback){
         if (listIsNull()) {
-            list = new ArrayList<Conversation>();
+            list = new ArrayList<>();
         }
         if (listIsEmpty()){
             //populate list
             isFirstLoaded = false;
+            i = 0;
             new AsyncTask<Void, Conversation, Boolean>() {
                 @Override
                 protected Boolean doInBackground(Void... voids) {
@@ -35,21 +37,31 @@ public class ConversationsList {
                         if (query.moveToFirst()) {
                             do {
                                 Conversation conversation = Conversation.getConversationInfo(context, query);
-                                list.add(conversation);
-                                if(callback != null){
-                                    callback.onConversationLoaded(conversation);
-                                    if(!isFirstLoaded){
-                                        isFirstLoaded = true;
-                                        callback.onFirstConversationLoaded(conversation);
-                                    }
-                                }
+                                publishProgress(conversation);
                             } while (query.moveToNext());
                         }
                         query.close();
                     }
                     return true;
                 }
+
+                @Override
+                protected void onProgressUpdate (Conversation... prog){
+                    Conversation conversation = prog[0];
+                    list.add(conversation);
+                    if(callback != null){
+                        callback.onConversationLoaded(conversation, i);
+                        if(!isFirstLoaded){
+                            isFirstLoaded = true;
+                            callback.onFirstConversationLoaded(conversation, i);
+                        }
+                    }
+                    i++;
+                }
+
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            callback.isAlreadyLoaded();
         }
     }
 
@@ -64,6 +76,13 @@ public class ConversationsList {
         if(!listIsNull() && !listIsEmpty()) {
             list.add(conversation);
         }
+    }
+
+    public static int size(){
+        if(!listIsNull() && !listIsEmpty()){
+            return list.size();
+        }
+        return 0;
     }
 
     public static void moveIndexToTop(int index){
@@ -98,8 +117,10 @@ public class ConversationsList {
      * Callback interface
      */
     public interface ConversationsListCallback{
-        public abstract void onConversationLoaded(Conversation conversation);
-        public abstract void onFirstConversationLoaded(Conversation conversation);
+        public void onConversationLoaded(Conversation conversation, int index);
+        public void onFirstConversationLoaded(Conversation conversation, int index);
+//        public void onConversationsListLoaded();
+        public void isAlreadyLoaded();
     }
 
 }

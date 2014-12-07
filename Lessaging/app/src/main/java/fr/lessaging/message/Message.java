@@ -1,4 +1,4 @@
-package fr.lessaging.conversation;
+package fr.lessaging.message;
 
 import android.content.Context;
 import android.net.Uri;

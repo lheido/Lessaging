@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ff2a2a2a</color>
-    <color name="colorPrimaryDark">#ff171717</color>
+    <color name="colorPrimary">#ff171717</color>
+    <color name="colorPrimaryDark">#ff000000</color>
+    <color name="textColorPrimary">#ffe6e6e6</color>
+    <color name="windowBackground">#ff545454</color>
+    <color name="grey_mid">#FF2A2A2A</color>
+    <color name="grey_mid_high">#FF343434</color>
+    <color name="grey_low">#FF171717</color>
+    <color name="grey_high">#FF545454</color>
+    <color name="black">#ff000000</color>
+    <color name="read_green">#FF2A5A2A</color>
+    <color name="new_message">#FF5AAA5A</color>
+    <color name="default_message">#999999</color>
+    <color name="bg_conversationList" >#EE191919</color>
+    <color name="bg_conversationList_new_message" >#9601a308</color>
 </resources>

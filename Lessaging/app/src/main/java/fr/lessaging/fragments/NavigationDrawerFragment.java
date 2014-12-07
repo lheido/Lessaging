@@ -1,9 +1,9 @@
 package fr.lessaging.fragments;
 
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
-import android.app.Fragment;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,14 +23,21 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.twotoasters.jazzylistview.JazzyListView;
+
 import fr.lessaging.R;
+import fr.lessaging.adapters.ConversationsListAdapter;
+import fr.lessaging.conversation.Conversation;
+import fr.lessaging.conversation.ConversationsList;
+import fr.lessaging.utils.AppConfig;
+import fr.lessaging.utils.UserPref;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment implements ConversationsList.ConversationsListCallback {
 
     /**
      * Remember the position of the selected item.
@@ -53,12 +61,13 @@ public class NavigationDrawerFragment extends Fragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
+    private JazzyListView mDrawerListView;
     private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private ConversationsListAdapter mConversationsListAdapter;
 
     public NavigationDrawerFragment() {
     }
@@ -91,24 +100,19 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mDrawerListView = (ListView) inflater.inflate(
+        mDrawerListView = (JazzyListView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
+
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectItem(position);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                }));
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+        mConversationsListAdapter = new ConversationsListAdapter(getActivity().getApplicationContext());
+        mDrawerListView.setAdapter(mConversationsListAdapter);
+        mConversationsListAdapter.notifyDataSetChanged();
+
         return mDrawerListView;
     }
 
@@ -177,7 +181,6 @@ public class NavigationDrawerFragment extends Fragment {
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
         }
-
         // Defer code dependent on restoration of previous instance state.
         mDrawerLayout.post(new Runnable() {
             @Override
@@ -187,6 +190,8 @@ public class NavigationDrawerFragment extends Fragment {
         });
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        ConversationsList.load(getActivity().getApplicationContext(), this);
     }
 
     private void selectItem(int position) {
@@ -248,10 +253,10 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
+//        if (item.getItemId() == R.id.action_example) {
+//            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -263,12 +268,38 @@ public class NavigationDrawerFragment extends Fragment {
     private void showGlobalContextActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setTitle(R.string.app_name);
     }
 
     private ActionBar getActionBar() {
         return ((ActionBarActivity) getActivity()).getSupportActionBar();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(mDrawerListView != null){
+            mDrawerListView.setTransitionEffect(
+                    UserPref.getListConversationEffect(getActivity().getApplicationContext()));
+        }
+    }
+
+    @Override
+    public void onConversationLoaded(Conversation conversation, int index) {
+        if(AppConfig.DEBUG){
+            Log.e("onConversationLoaded", index+" "+conversation.getContactName());
+        }
+        mConversationsListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onFirstConversationLoaded(Conversation conversation, int index) {
+        selectItem(0);
+    }
+
+    @Override
+    public void isAlreadyLoaded() {
+        selectItem(0);
     }
 
     /**
