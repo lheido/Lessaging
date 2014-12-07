@@ -67,6 +67,7 @@ public class MainActivity extends ActionBarActivity
 
     public void onSectionAttached(String contactName) {
         mTitle = contactName;
+        getSupportActionBar().setTitle(mTitle);
     }
 
     public void restoreActionBar() {

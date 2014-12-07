@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.telephony.PhoneNumberUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,13 @@ import android.widget.Toast;
 
 import com.twotoasters.jazzylistview.JazzyListView;
 
+import java.util.Locale;
+
 import fr.lessaging.R;
 import fr.lessaging.adapters.SmsAdapter;
+import fr.lessaging.message.Message;
+import fr.lessaging.message.MessageTaskCallback;
+import fr.lessaging.message.SmsTask;
 
 
 /**
@@ -92,59 +98,35 @@ public class SmsFragment extends SmsBaseFragment {
 
     @Override
     protected void load_conversation() {
-//        LheidoUtils.SmsTask loadTask = new LheidoUtils.SmsTask(getActivity(), conversationId) {
-//            @Override
-//            protected void onProgressUpdate(Message... prog) {
-//                if (this.act.get() != null) {
-//                    add__(prog[0], 1);
-//                }
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Boolean result) {
-//                if (act.get() != null) {
-//                    if (!result)
-//                        Toast.makeText(context, "Problème génération conversation", Toast.LENGTH_LONG).show();
-//                    else {
-//                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-//                            liste.smoothScrollToPosition(liste.getBottom());
-//                        }
-//                    }
-//                }
-//            }
-//        };
-//        loadTask.execTask();
+        new SmsTask(getActivity(), conversationId, new MessageTaskCallback() {
+            @Override
+            public void onMessageLoaded(Message message) {
+                add__(message, 1, true);
+                liste.smoothScrollToPosition(liste.getBottom());
+            }
+
+            @Override
+            public void onLoaded() {}
+        }).execTask();
     }
 
     @Override
-    protected void load_more_conversation(final long last_id, final int index, final int top, final int start_count) {
-//        LheidoUtils.SmsTask more = new LheidoUtils.SmsTask(getActivity(), conversationId, last_id) {
-//            @Override
-//            protected void onProgressUpdate(Message... prog) {
-//                if (this.act.get() != null) {
-//                    Message_list.add(prog[0]);
-//                }
-//            }
-//
-//            @Override
-//            protected void onPreExecute() {
-//                super.onPreExecute();
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Boolean result) {
-//                if (this.act.get() != null) {
-//                    if (!result)
-//                        Toast.makeText(context, "Problème génération conversation", Toast.LENGTH_LONG).show();
-//                    else {
-//                        swipeLayout.setRefreshing(false);
-//                        mAdapter.notifyDataSetChanged();
-//                        int finalposition = index + liste.getCount() - start_count;
-//                        liste.setSelectionFromTop(finalposition, top);
-//                    }
-//                }
-//            }
-//        };
-//        more.execTask();
+    protected void load_more_conversation(final long last_id, final int index, final int top,
+                                          final int start_count) {
+        new SmsTask(getActivity(), conversationId, last_id, new MessageTaskCallback() {
+            @Override
+            public void onMessageLoaded(Message message) {
+                add__(message, -1, false);
+            }
+
+            @Override
+            public void onLoaded() {
+                swipeLayout.setRefreshing(false);
+                mAdapter.notifyDataSetChanged();
+                int finalposition = index + liste.getCount() - start_count;
+                liste.setSelection(finalposition);
+                liste.smoothScrollToPosition(finalposition - 1);
+            }
+        }).execTask();
     }
 }

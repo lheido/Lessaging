@@ -92,6 +92,7 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
         });
         initConversationAdapter();
         liste.setAdapter(mAdapter);
+        load_conversation();
         swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(this);
         // init broadcast receiver to receive SMS or MMS and delivered
@@ -107,33 +108,23 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
     public void add_(String phone, long _id, String body, String sender, int deli, Time t, int position){
         Message sms = new Message(_id, body, sender, deli, t);
         sms.setSender(phone);
-        add__(sms, position);
+        add__(sms, position, true);
     }
 
-    public void add__(Message sms, int position){
-        if(position != 0){
+    public void add__(Message sms, int position, boolean notify){
+        if (position == -1 || position > Message_list.size()){
             Message_list.add(sms);
-        } else{
-            Message_list.add(0, sms);
+        } else {
+            Message_list.add(position, sms);
         }
-        mAdapter.notifyDataSetChanged();
+        if(notify)
+            mAdapter.notifyDataSetChanged();
     }
 
     public void userAddSms(long new_id, String body, String s, int i, Time now, int i1){
         add_("", new_id, body, s, i, now, i1);
         conversation_nb_sms += 1;
         liste.smoothScrollToPosition(liste.getBottom());
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-//            ((MainActivity) activity).onSectionAttached(getArguments().getString(ARG_CONTACT_NAME));
-        }catch (Exception e){
-            Log.v("onAttach", "ERREUR SmsBaseFragment onAttach");
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -161,10 +152,6 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
 
     public void updateFragment(){
         if(liste != null) {
-            if (Message_list != null) {
-                Message_list.clear();
-                load_conversation();
-            }
             liste.setTransitionEffect(UserPref.getConversationEffect(context));
         }
     }

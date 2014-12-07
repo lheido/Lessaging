@@ -25,8 +25,7 @@ public class Message {
         this.body_ = body;
         this.date_ = t;
         this.sender = sender;
-        if(deli == 0) this.read_ = true;
-        else this.read_ = false;
+        this.read_ = deli == 0;
     }
 
     public static String formatDate(Context context, Time date){
