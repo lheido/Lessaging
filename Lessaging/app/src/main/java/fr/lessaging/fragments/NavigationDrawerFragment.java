@@ -282,6 +282,23 @@ public class NavigationDrawerFragment extends Fragment implements ConversationsL
             mDrawerListView.setTransitionEffect(
                     UserPref.getListConversationEffect(getActivity().getApplicationContext()));
         }
+        ConversationsList.setListener(new ConversationsList.ListenerCallback() {
+            @Override
+            public void onItemAdded() {
+                //Probably a new conversation was added.
+            }
+
+            @Override
+            public void onItemMovedToTop() {
+                //Call when new message was received.
+            }
+        });
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        ConversationsList.setListener(null);
     }
 
     @Override

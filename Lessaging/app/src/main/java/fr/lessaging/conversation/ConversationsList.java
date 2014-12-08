@@ -18,6 +18,7 @@ public class ConversationsList {
     private static ArrayList<Conversation> list;
     private static boolean isFirstLoaded;
     private static int i;
+    private static ListenerCallback listener;
 
     public static void load(final Context context, final ConversationsListCallback callback){
         if (listIsNull()) {
@@ -75,6 +76,9 @@ public class ConversationsList {
     public static void add(Conversation conversation){
         if(!listIsNull() && !listIsEmpty()) {
             list.add(conversation);
+            if(listener != null){
+                listener.onItemAdded();
+            }
         }
     }
 
@@ -86,11 +90,15 @@ public class ConversationsList {
     }
 
     public static void moveIndexToTop(int index){
-
+        if(listener != null){
+            listener.onItemMovedToTop();
+        }
     }
 
     public static void moveConversationToTop(Conversation conversation){
-
+        if(listener != null){
+            listener.onItemMovedToTop();
+        }
     }
 
     private static boolean listIsNull(){
@@ -113,14 +121,32 @@ public class ConversationsList {
         return result;
     }
 
+    public static void setListener(ListenerCallback listener) {
+        if(ConversationsList.listener != null && listener != null){
+            if(AppConfig.DEBUG){
+                Log.w("setListener", "Multiple calls to setListener method.");
+            }
+        }
+        ConversationsList.listener = listener;
+    }
+
     /**
-     * Callback interface
+     * Callback interface for loading conversations list.
      */
     public interface ConversationsListCallback{
         public void onConversationLoaded(Conversation conversation, int index);
         public void onFirstConversationLoaded(Conversation conversation, int index);
 //        public void onConversationsListLoaded();
         public void isAlreadyLoaded();
+    }
+
+    /**
+     * Callback interface for add/move action.
+     * Must be set to null when activity/fragment call onPause or onDestroy methods.
+     */
+    public interface ListenerCallback{
+        public void onItemAdded();
+        public void onItemMovedToTop();
     }
 
 }
