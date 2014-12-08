@@ -112,10 +112,10 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
     }
 
     public void add__(Message sms, int position, boolean notify){
-        if (position == -1 || position > Message_list.size()){
+        if(position != 0){
             Message_list.add(sms);
-        } else {
-            Message_list.add(position, sms);
+        } else{
+            Message_list.add(0, sms);
         }
         if(notify)
             mAdapter.notifyDataSetChanged();

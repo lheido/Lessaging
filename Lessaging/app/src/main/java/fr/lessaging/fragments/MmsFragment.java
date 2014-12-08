@@ -13,12 +13,15 @@ import com.twotoasters.jazzylistview.JazzyListView;
 
 import fr.lessaging.R;
 import fr.lessaging.adapters.MmsAdapter;
+import fr.lessaging.message.Message;
+import fr.lessaging.message.MessageTaskCallback;
+import fr.lessaging.message.MmsTask;
 
 /**
  * Created by lheido on 31/10/14.
  */
 public class MmsFragment extends SmsBaseFragment {
-    private ImageButton zoom;
+//    private ImageButton zoom;
 
     @Override
     protected View initRootView(LayoutInflater inflater, ViewGroup container) {
@@ -28,13 +31,13 @@ public class MmsFragment extends SmsBaseFragment {
     @Override
     protected com.twotoasters.jazzylistview.JazzyListView initList(View rootView) {
         // add extra view only with MMS
-        zoom = (ImageButton)rootView.findViewById(R.id.expanded_image);
-        zoom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                zoom.setVisibility(View.INVISIBLE);
-            }
-        });
+//        zoom = (ImageButton)rootView.findViewById(R.id.expanded_image);
+//        zoom.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                zoom.setVisibility(View.INVISIBLE);
+//            }
+//        });
         return (JazzyListView)rootView.findViewById(R.id.list_conversation_mms);
     }
 
@@ -97,13 +100,13 @@ public class MmsFragment extends SmsBaseFragment {
 
     @Override
     protected void initListOnItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        Uri uri = Message_list.get(Message_list.size()-1-position).getUriPicture();
-        try{
-            Picasso.with(context).load(uri).resize(zoom.getMeasuredWidth()-zoom.getPaddingLeft()*2, zoom.getMeasuredHeight()-zoom.getPaddingTop()*2).centerInside().into(zoom);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        zoom.setVisibility(View.VISIBLE);
+//        Uri uri = Message_list.get(Message_list.size()-1-position).getUriPicture();
+//        try{
+//            Picasso.with(context).load(uri).resize(zoom.getMeasuredWidth()-zoom.getPaddingLeft()*2, zoom.getMeasuredHeight()-zoom.getPaddingTop()*2).centerInside().into(zoom);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        zoom.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -113,44 +116,34 @@ public class MmsFragment extends SmsBaseFragment {
 
     @Override
     protected void load_conversation() {
-//        LheidoUtils.MmsTask loadTask = new LheidoUtils.MmsTask(getActivity(), conversationId) {
-//            @Override
-//            protected void onProgressUpdate(Message... prog) {
-//                if (this.act.get() != null) {
-//                    add__(prog[0], 1);
-//                }
-//            }
-//        };
-//        loadTask.execTask();
+        new MmsTask(getActivity(), conversationId, new MessageTaskCallback() {
+            @Override
+            public void onMessageLoaded(Message message) {
+                add__(message, 1, true);
+                liste.smoothScrollToPosition(liste.getBottom());
+            }
+
+            @Override
+            public void onLoaded() {}
+        }).execTask();
     }
 
     @Override
     protected void load_more_conversation(final long last_id, final int index, final int top, final int start_count) {
-//        LheidoUtils.MmsTask more = new LheidoUtils.MmsTask(getActivity(), conversationId, last_id) {
-//            @Override
-//            protected void onProgressUpdate(Message... prog) {
-//                if (this.act.get() != null) {
-//                    Message_list.add(prog[0]);
-//                }
-//            }
-//
-//            @Override
-//            protected void onPreExecute() {
-//                super.onPreExecute();
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Boolean result) {
-//                if (act.get() != null) {
-//                    if (!result)
-//                        Toast.makeText(context, "Problème génération conversation", Toast.LENGTH_LONG).show();
-//                    swipeLayout.setRefreshing(false);
-//                    mAdapter.notifyDataSetChanged();
-//                    int finalposition = index + liste.getCount() - start_count;
-//                    liste.setSelectionFromTop(finalposition, top);
-//                }
-//            }
-//        };
-//        more.execTask();
+        new MmsTask(getActivity(), conversationId, last_id, new MessageTaskCallback() {
+            @Override
+            public void onMessageLoaded(Message message) {
+                add__(message, -1, false);
+            }
+
+            @Override
+            public void onLoaded() {
+                swipeLayout.setRefreshing(false);
+                mAdapter.notifyDataSetChanged();
+                int finalposition = index + liste.getCount() - start_count;
+                liste.setSelection(finalposition);
+                liste.smoothScrollToPosition(finalposition - 1);
+            }
+        }).execTask();
     }
 }
