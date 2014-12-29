@@ -39,7 +39,7 @@ public class Conversation {
         this.mConversationId = conversationId;
     }
 
-    public Conversation newInstance(){
+    public Conversation copy(){
         Conversation c = new Conversation();
         c.setContactName(this.mContactName);
         c.setContactPhone(this.mContactPhone);
@@ -210,6 +210,33 @@ public class Conversation {
             e.printStackTrace();
         }
         return res;
+    }
+
+    public static Long getOrCreateThreadId(Context context, String phone){
+        try{
+            Uri threadIdUri = Uri.parse("content://mms-sms/threadID");
+            Uri.Builder builder = threadIdUri.buildUpon();
+            String[] recipients = {phone};
+            for(String recipient : recipients){
+                builder.appendQueryParameter("recipient", recipient);
+            }
+            Uri uri = builder.build();
+            Long threadId = 0L;
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{"_id"}, null, null, null);
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        threadId = cursor.getLong(0);
+                    }
+                } finally {
+                    cursor.close();
+                }
+                return threadId;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return -1L;
     }
 }
 

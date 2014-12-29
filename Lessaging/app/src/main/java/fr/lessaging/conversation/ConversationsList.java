@@ -18,9 +18,9 @@ public class ConversationsList {
     private static ArrayList<Conversation> list;
     private static boolean isFirstLoaded;
     private static int i;
-    private static ListenerCallback listener;
+    private static ConversationsListActionsListener actionsListener;
 
-    public static void load(final Context context, final ConversationsListCallback callback){
+    public static void load(final Context context, final ConversationsListLoadingListener callback){
         if (listIsNull()) {
             list = new ArrayList<>();
         }
@@ -74,10 +74,14 @@ public class ConversationsList {
     }
 
     public static void add(Conversation conversation){
+        add(list.size(), conversation);
+    }
+
+    public static void add(int index, Conversation conversation){
         if(!listIsNull() && !listIsEmpty()) {
-            list.add(conversation);
-            if(listener != null){
-                listener.onItemAdded();
+            list.add(index, conversation);
+            if(actionsListener != null){
+                actionsListener.onItemAdded();
             }
         }
     }
@@ -86,18 +90,24 @@ public class ConversationsList {
         if(!listIsNull() && !listIsEmpty()){
             return list.size();
         }
-        return 0;
+        return -1;
     }
 
     public static void moveIndexToTop(int index){
-        if(listener != null){
-            listener.onItemMovedToTop();
+        if(!listIsNull() && !listIsEmpty()){
+            Conversation c = list.remove(index);
+            list.add(0, c);
+            list.get(0).nbSmsIncrese();
+            if(actionsListener != null){
+                actionsListener.onItemMovedToTop();
+            }
         }
     }
 
     public static void moveConversationToTop(Conversation conversation){
-        if(listener != null){
-            listener.onItemMovedToTop();
+        if(!listIsNull() && !listIsEmpty()) {
+            int index = list.indexOf(conversation);
+            moveIndexToTop(index);
         }
     }
 
@@ -121,19 +131,19 @@ public class ConversationsList {
         return result;
     }
 
-    public static void setListener(ListenerCallback listener) {
-        if(ConversationsList.listener != null && listener != null){
+    public static void setActionsListener(ConversationsListActionsListener actionsListener) {
+        if(ConversationsList.actionsListener != null && actionsListener != null){
             if(AppConfig.DEBUG){
-                Log.w("setListener", "Multiple calls to setListener method.");
+                Log.w("setActionsListener", "Multiple calls to setActionsListener method.");
             }
         }
-        ConversationsList.listener = listener;
+        ConversationsList.actionsListener = actionsListener;
     }
 
     /**
      * Callback interface for loading conversations list.
      */
-    public interface ConversationsListCallback{
+    public interface ConversationsListLoadingListener {
         public void onConversationLoaded(Conversation conversation, int index);
         public void onFirstConversationLoaded(Conversation conversation, int index);
 //        public void onConversationsListLoaded();
@@ -144,7 +154,7 @@ public class ConversationsList {
      * Callback interface for add/move action.
      * Must be set to null when activity/fragment call onPause or onDestroy methods.
      */
-    public interface ListenerCallback{
+    public interface ConversationsListActionsListener {
         public void onItemAdded();
         public void onItemMovedToTop();
     }

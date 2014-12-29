@@ -1,5 +1,6 @@
 package fr.lessaging.fragments;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
@@ -19,9 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.twotoasters.jazzylistview.JazzyListView;
 
@@ -29,6 +27,9 @@ import fr.lessaging.R;
 import fr.lessaging.adapters.ConversationsListAdapter;
 import fr.lessaging.conversation.Conversation;
 import fr.lessaging.conversation.ConversationsList;
+import fr.lessaging.message.Message;
+import fr.lessaging.preferences.LessagingPreference;
+import fr.lessaging.receiver.MessageReceiver;
 import fr.lessaging.utils.AppConfig;
 import fr.lessaging.utils.UserPref;
 
@@ -37,7 +38,7 @@ import fr.lessaging.utils.UserPref;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment implements ConversationsList.ConversationsListCallback {
+public class NavigationDrawerFragment extends Fragment implements ConversationsList.ConversationsListLoadingListener {
 
     /**
      * Remember the position of the selected item.
@@ -252,11 +253,124 @@ public class NavigationDrawerFragment extends Fragment implements ConversationsL
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-//        if (item.getItemId() == R.id.action_example) {
-//            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-//            return true;
-//        }
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent intent;
+            intent = new Intent(getActivity().getApplicationContext(), LessagingPreference.class);
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            }
+            return true;
+        }else if(id == R.id.action_new_conversation) {
+//            final Context context = getActivity().getApplicationContext();
+//            LheidoUtils.LheidoDialog dialog = new LheidoUtils.LheidoDialog(
+//                    this, R.layout.new_conversation, "Nouvelle conversation") {
+//                LheidoContact contact = null;
+//                public EditText edit;
+//                public ListView list;
+//                public ContactsListAdapter list_adapter;
+//                public ArrayList<LheidoContact> suggestions;
+//
+//                @Override
+//                public void customInit() {
+//                    edit = (EditText) findViewById(R.id.new_conversation_phone);
+//                    list = (ListView) findViewById(R.id.contact_list);
+//                    suggestions = new ArrayList<LheidoContact>();
+//                    list_adapter = new ContactsListAdapter(context, suggestions);
+//                    list.setAdapter(list_adapter);
+//                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                            edit.setText(suggestions.get(position).getName());
+//                            list.requestFocus();
+//                        }
+//                    });
+//                    edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                        @Override
+//                        public void onFocusChange(View view, boolean hasFocus) {
+//                            if(!hasFocus) {
+//                                InputMethodManager inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//                                inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+//                            }
+//                        }
+//                    });
+//                    edit.addTextChangedListener(new TextWatcher() {
+//                        public String s;
+//
+//                        @Override
+//                        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {}
+//
+//                        @Override
+//                        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+//                            this.s = charSequence.toString();
+//                        }
+//
+//                        @Override
+//                        public void afterTextChanged(Editable editable) {
+//                            suggestions.clear();
+//                            for(LheidoContact c: contactsList){
+//                                if(c.getName().toLowerCase().contains(this.s.toLowerCase()) ||
+//                                        c.getPhone().toLowerCase().contains(this.s.toLowerCase())){
+//                                    suggestions.add(c.newInstance());
+//                                }
+//                            }
+//                            list_adapter.notifyDataSetChanged();
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void customCancel() {}
+//
+//                @Override
+//                public void cancel(){
+//                    super.cancel();
+//                    contact = null;
+//                }
+//
+//                @Override
+//                public void customOk() {
+//                    EditText nConversationPhone = (EditText)findViewById(
+//                            R.id.new_conversation_phone);
+//                    String str = nConversationPhone.getText().toString();
+//                    if(!PhoneNumberUtils.isGlobalPhoneNumber(str)){
+//                        if(contact == null){
+//                            for (LheidoContact tmp : contactsList) {
+//                                if (tmp.getName().equals(str)) contact = tmp;
+//                            }
+//                        }
+//                        if(contact != null) {
+//                            int position = -1;
+//                            for (LheidoContact c : Global.conversationsList) {
+//                                if (c.getName().equals(contact.getName()))
+//                                    position = Global.conversationsList.indexOf(c);
+//                            }
+//                            if (position != -1) {
+//                                onNavigationDrawerItemSelected(position, Global.conversationsList.get(position));
+//                            } else {
+//                                createNewConversation(contact, str);
+//                            }
+//                        }else{
+//                            Toast.makeText(context, R.string.error_contact_name, Toast.LENGTH_SHORT).show();
+//                        }
+//                    }else{
+//                        int position = -1;
+//                        for (LheidoContact c : Global.conversationsList) {
+//                            if (c.getName().equals(str))
+//                                position = Global.conversationsList.indexOf(c);
+//                        }
+//                        if(position != -1) {
+//                            onNavigationDrawerItemSelected(position, Global.conversationsList.get(position));
+//                        }else{
+//                            createNewConversation(new LheidoContact(str, str, 0L, null), str);
+//                        }
+//                    }
+//                    contact = null;
+//                }
+//            };
+//            dialog.show();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -282,15 +396,20 @@ public class NavigationDrawerFragment extends Fragment implements ConversationsL
             mDrawerListView.setTransitionEffect(
                     UserPref.getListConversationEffect(getActivity().getApplicationContext()));
         }
-        ConversationsList.setListener(new ConversationsList.ListenerCallback() {
+        if(mConversationsListAdapter != null){
+            mConversationsListAdapter.notifyDataSetChanged();
+        }
+        ConversationsList.setActionsListener(new ConversationsList.ConversationsListActionsListener() {
             @Override
             public void onItemAdded() {
                 //Probably a new conversation was added.
+                mConversationsListAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onItemMovedToTop() {
                 //Call when new message was received.
+                mConversationsListAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -298,7 +417,7 @@ public class NavigationDrawerFragment extends Fragment implements ConversationsL
     @Override
     public void onPause(){
         super.onPause();
-        ConversationsList.setListener(null);
+        ConversationsList.setActionsListener(null);
     }
 
     @Override

@@ -3,6 +3,7 @@ package fr.lessaging.adapters;
 import android.content.Context;
 import android.support.v4.view.GravityCompat;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 
 import fr.lessaging.R;
 import fr.lessaging.message.Message;
+import fr.lessaging.utils.AppConfig;
 
 /**
  * Created by lheido on 31/10/14.
@@ -47,6 +49,11 @@ public class SmsAdapter extends SmsBaseAdapter {
         holder.mdate.setText(message.getDate(mContext));
 
         //RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) holder.mLayout.getLayoutParams();
+        if(AppConfig.DEBUG){
+            Log.v("SmsAdapter", "mPhoneContact="+mPhoneContact+", message.getSender()="+message.getSender()+
+            ", compare="+PhoneNumberUtils.compare(mPhoneContact, message.getSender())
+            );
+        }
         if(!PhoneNumberUtils.compare(mPhoneContact, message.getSender())) {
             holder.mLayout.setGravity(GravityCompat.END);
             holder.mLayout.setPadding(42, 0, 0, 0);

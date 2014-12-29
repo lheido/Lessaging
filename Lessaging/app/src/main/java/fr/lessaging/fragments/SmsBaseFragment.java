@@ -1,6 +1,5 @@
 package fr.lessaging.fragments;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -44,12 +43,9 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
     protected long conversation_nb_sms;
     protected JazzyListView liste;
     protected int list_conversationId; // id for global conversations list
-    protected ArrayList<Message> Message_list = new ArrayList<Message>();
+    protected ArrayList<Message> Message_list;
     protected SmsBaseAdapter mAdapter;
-    protected BroadcastReceiver mBroadCast;
     protected SwipeRefreshLayout swipeLayout;
-    protected boolean mOnPause = false;
-    protected IntentFilter filter;
 
     public static void setArgs(SmsBaseFragment fragment, Conversation conversation, int position){
         Bundle args = new Bundle();
@@ -74,6 +70,7 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
         conversationId = getArguments().getInt(ARG_CONVERSATION_ID);
         conversation_nb_sms = getArguments().getLong(ARG_CONVERSATION_COUNT);
         list_conversationId = getArguments().getInt(ARG_CONVERSATION_NUMBER);
+        Message_list = new ArrayList<Message>();
         liste = initList(rootView);
         liste.setTransitionEffect(UserPref.getConversationEffect(context));
         liste.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
@@ -92,12 +89,9 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
         });
         initConversationAdapter();
         liste.setAdapter(mAdapter);
-        load_conversation();
+//        load_conversation();
         swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(this);
-        // init broadcast receiver to receive SMS or MMS and delivered
-//        initBroadcastReceiver();
-//        context.registerReceiver(mBroadCast, filter);
         return rootView;
     }
 
@@ -130,23 +124,11 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
     @Override
     public void onPause(){
         super.onPause();
-        mOnPause = true;
-//        try {
-//            context.unregisterReceiver(mBroadCast);
-//        }catch (Exception e){
-//            Toast.makeText(context, "Error onPause unregisterReceiver", Toast.LENGTH_LONG).show();
-//        }
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        mOnPause = false;
-//        try {
-//            context.registerReceiver(mBroadCast, filter);
-//        }catch (Exception e){
-//            Toast.makeText(context, "Error onResume registerReceiver", Toast.LENGTH_LONG).show();
-//        }
         updateFragment();
     }
 
@@ -154,6 +136,12 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
         if(liste != null) {
             liste.setTransitionEffect(UserPref.getConversationEffect(context));
         }
+        if(Message_list == null){
+            Message_list = new ArrayList<>();
+        } else {
+            Message_list.clear();
+        }
+        load_conversation();
     }
 
     @Override
@@ -185,11 +173,6 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
      * @param rootView
      */
     protected abstract JazzyListView initList(View rootView);
-
-    /**
-     * init broadcastReceiver with appropriate receiver and filter.
-     */
-    protected abstract void initBroadcastReceiver();
 
     /**
      * init adapter with appropriate adapter (ConversationSmsAdapter/ConversationMmsAdapter).

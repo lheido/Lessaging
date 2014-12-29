@@ -41,8 +41,8 @@ public class MmsFragment extends SmsBaseFragment {
         return (JazzyListView)rootView.findViewById(R.id.list_conversation_mms);
     }
 
-    @Override
-    protected void initBroadcastReceiver() {
+//    @Override
+//    protected void initBroadcastReceiver() {
 //        mBroadCast = new MmsFragmentReceiver() {
 //            @Override
 //            protected void customNotifyDelivered(long id) {
@@ -91,7 +91,7 @@ public class MmsFragment extends SmsBaseFragment {
 //            }
 //        };
 //        filter.addAction(LheidoUtils.ACTION_RECEIVE_MMS);
-    }
+//    }
 
     @Override
     protected void initConversationAdapter() {

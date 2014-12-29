@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_call"
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_device_access_call"
+        android:title="@string/action_call_title"
+        />
+    <item
+        android:id="@+id/action_voir_contact"
+        android:icon="@drawable/ic_action_social_person"
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_voir_contact"/>
+
+    <item
+        android:id="@+id/action_remove_conversation"
+        android:icon="@drawable/ic_action_content_discard"
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_remove_conversation" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+</menu>

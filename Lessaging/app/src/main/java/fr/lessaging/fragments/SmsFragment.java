@@ -4,7 +4,6 @@ import android.content.ClipData;
 import android.content.Context;
 import android.os.Build;
 import android.telephony.PhoneNumberUtils;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +13,21 @@ import android.widget.Toast;
 
 import com.twotoasters.jazzylistview.JazzyListView;
 
-import java.util.Locale;
+
+import java.util.ArrayList;
 
 import fr.lessaging.R;
 import fr.lessaging.adapters.SmsAdapter;
 import fr.lessaging.message.Message;
 import fr.lessaging.message.MessageTaskCallback;
 import fr.lessaging.message.SmsTask;
+import fr.lessaging.receiver.MessageReceiver;
 
 
 /**
  * Created by lheido on 31/10/14.
  */
-public class SmsFragment extends SmsBaseFragment {
+public class SmsFragment extends SmsBaseFragment implements MessageReceiver.MessageReceiverCallback {
 
     @Override
     protected View initRootView(LayoutInflater inflater, ViewGroup container) {
@@ -36,40 +37,6 @@ public class SmsFragment extends SmsBaseFragment {
     @Override
     protected com.twotoasters.jazzylistview.JazzyListView initList(View rootView) {
         return (JazzyListView)rootView.findViewById(R.id.list_conversation);
-    }
-
-    @Override
-    protected void initBroadcastReceiver() {
-//        mBroadCast = new SmsFragmentReceiver() {
-//            @Override
-//            protected void customNotifyDelivered(long id) {
-//                if(!mOnPause && id != -1){
-//                    int k = 0;
-//                    boolean find = false;
-//                    while (!find && k < Message_list.size()) {
-//                        if (id == Message_list.get(k).getId()) {
-//                            find = true;
-//                            Message_list.get(k).setRead(true);
-//                            mAdapter.notifyDataSetChanged();
-//                        }
-//                        k++;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            protected void customNotifyReceive(long id, String sender, String body, long date, boolean isRead) {
-//                if(PhoneNumberUtils.compare(phoneContact, sender) && !mOnPause){
-//                    //on est dans la bonne conversation !
-//                    Time t = new Time();
-//                    t.set(date);
-//                    add_(sender, id, body, "", 0, t, 0);
-//                    conversation_nb_sms += 1;
-//                    liste.smoothScrollToPosition(liste.getBottom());
-//                }
-//            }
-//        };
-//        filter = ((SmsFragmentReceiver) mBroadCast).getIntentFilter(3000);
     }
 
     @Override
@@ -94,6 +61,18 @@ public class SmsFragment extends SmsBaseFragment {
             clipboard.setPrimaryClip(clip);
         }
         Toast.makeText(context, R.string.message_copy, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        MessageReceiver.removeCallback(this);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        MessageReceiver.addCallback(this);
     }
 
     @Override
@@ -128,5 +107,29 @@ public class SmsFragment extends SmsBaseFragment {
                 liste.smoothScrollToPosition(finalposition - 1);
             }
         }).execTask();
+    }
+
+    @Override
+    public void onReceivedNewSms(Message newMessage, String senderName) {
+        if (PhoneNumberUtils.compare(newMessage.getSender(), phoneContact) || name.equals(senderName)) {
+            add__(newMessage, 0, true);
+            liste.smoothScrollToPosition(liste.getBottom());
+        }
+    }
+
+    @Override
+    public void onDelivered(long id) {
+        if(id != -1){
+            int k = 0;
+            boolean find = false;
+            while (!find && k < Message_list.size()) {
+                if (id == Message_list.get(k).getId()) {
+                    find = true;
+                    Message_list.get(k).setRead(true);
+                    mAdapter.notifyDataSetChanged();
+                }
+                k++;
+            }
+        }
     }
 }

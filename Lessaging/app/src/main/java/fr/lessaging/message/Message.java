@@ -20,10 +20,19 @@ public class Message {
     public Message(){}
 
     public Message(long _id, String body, String sender, int deli,Time t){
-        if(_id != -1)
-            this._id = _id;
-        this.body_ = body;
+        this(_id, body, sender, deli);
         this.date_ = t;
+    }
+
+    public Message(long _id, String body, String sender, int deli, long date){
+        this(_id, body, sender, deli);
+        this.date_ = new Time();
+        this.date_.set(date);
+    }
+
+    public Message(long _id, String body, String sender, int deli){
+        this._id = _id;
+        this.body_ = body;
         this.sender = sender;
         this.read_ = deli == 0;
     }
@@ -46,6 +55,10 @@ public class Message {
 
     public void setDate(Time date){
         this.date_ = date;
+    }
+    public void setDate(long date){
+        this.date_ = new Time();
+        this.date_.set(date);
     }
     public String getDate(Context context){
         return formatDate(context, this.date_);

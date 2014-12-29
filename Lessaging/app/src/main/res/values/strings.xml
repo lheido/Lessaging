@@ -74,4 +74,6 @@
     <string name="date_format_current_month">%d/%m/%Y %H:%M</string>
     <string name="date_format">%d/%m/%Y</string>
 
+    <string name="receive_new_sms_toast">Receive sms from %s</string>
+
 </resources>
