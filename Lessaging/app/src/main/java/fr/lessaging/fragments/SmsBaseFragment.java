@@ -99,12 +99,6 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
         return phoneContact;
     }
 
-    public void add_(String phone, long _id, String body, String sender, int deli, Time t, int position){
-        Message sms = new Message(_id, body, sender, deli, t);
-        sms.setSender(phone);
-        add__(sms, position, true);
-    }
-
     public void add__(Message sms, int position, boolean notify){
         if(position != 0){
             Message_list.add(sms);
@@ -115,8 +109,8 @@ public abstract class SmsBaseFragment extends Fragment implements SwipeRefreshLa
             mAdapter.notifyDataSetChanged();
     }
 
-    public void userAddSms(long new_id, String body, String s, int i, Time now, int i1){
-        add_("", new_id, body, s, i, now, i1);
+    public void userAddSms(Message sms, int position){
+        add__(sms, position, true);
         conversation_nb_sms += 1;
         liste.smoothScrollToPosition(liste.getBottom());
     }

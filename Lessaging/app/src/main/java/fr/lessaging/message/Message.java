@@ -10,6 +10,7 @@ import fr.lessaging.R;
  * Created by lheido on 05/12/14.
  */
 public class Message {
+    private int type;
     private String sender = null;
     private String body_ = null;
     private Uri img_ = null;
@@ -19,22 +20,23 @@ public class Message {
 
     public Message(){}
 
-    public Message(long _id, String body, String sender, int deli,Time t){
-        this(_id, body, sender, deli);
+    public Message(long _id, String body, String sender, int deli, String type,Time t){
+        this(_id, body, sender, deli, type);
         this.date_ = t;
     }
 
-    public Message(long _id, String body, String sender, int deli, long date){
-        this(_id, body, sender, deli);
+    public Message(long _id, String body, String sender, int deli, String type, long date){
+        this(_id, body, sender, deli, type);
         this.date_ = new Time();
         this.date_.set(date);
     }
 
-    public Message(long _id, String body, String sender, int deli){
+    public Message(long _id, String body, String sender, int deli, String type){
         this._id = _id;
         this.body_ = body;
         this.sender = sender;
         this.read_ = deli == 0;
+        this.type = Integer.parseInt(type);
     }
 
     public static String formatDate(Context context, Time date){
@@ -51,6 +53,14 @@ public class Message {
                 return date.format(context.getResources().getString(R.string.date_format_current_month));
         }
         return date.format(context.getResources().getString(R.string.date_format));
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public void setDate(Time date){

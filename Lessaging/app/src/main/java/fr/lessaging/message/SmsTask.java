@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
-import android.telephony.TelephonyManager;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
@@ -26,8 +25,8 @@ public class SmsTask extends AsyncTask<Void, Message, Boolean> {
     protected WeakReference<FragmentActivity> act = null;
     private Context context = null;
     private int conversationId;
-    private final String sms_uri = "content://sms";
-    private final String[] projection = {"*"};
+    private static final String sms_uri = "content://sms";
+    private static final String[] projection = {"*"};
     private String selection = "thread_id = ?";
     private ArrayList<String> selectionArgs = new ArrayList<String>();
 
@@ -81,15 +80,16 @@ public class SmsTask extends AsyncTask<Void, Message, Boolean> {
                     while(count < UserPref.getMaxSms(context) && query.moveToNext()){
                         _id = query.getLong(query.getColumnIndexOrThrow("_id"));
                         body = query.getString(query.getColumnIndexOrThrow("body"));
-//                            type = query.getString(query.getColumnIndexOrThrow("type"));
+                        type = query.getString(query.getColumnIndexOrThrow("type"));
 //                            Log.v("LOG type", "type = "+type+", body = "+body);
                         sender = query.getString(query.getColumnIndexOrThrow("address"));
-                        if(sender == null) sender = getUserPhone(context);
+//                        if(sender == null) sender = MessageManager.getUserPhone(context);
+//                        Log.e("address_"+_id, ""+sender);
                         status = query.getInt(query.getColumnIndexOrThrow("status"));
                         date = query.getLong(query.getColumnIndexOrThrow("date"));
                         Time t = new Time();
                         t.set(date);
-                        Message sms = new Message(_id, body, sender, status, t);
+                        Message sms = new Message(_id, body, sender, status, type, t);
                         publishProgress(sms);
                         count += 1;
                     }
@@ -97,7 +97,7 @@ public class SmsTask extends AsyncTask<Void, Message, Boolean> {
                     if(count == 0 && last_sms == -1){
                         Time now = new Time();
                         now.setToNow();
-                        Message sms = new Message(-1L, "Pas de sms", "1", 0, now);
+                        Message sms = new Message(-1L, "Pas de sms", "1", 0,"2", now);
                         publishProgress(sms);
                     }
                     publishProgress();
@@ -134,10 +134,5 @@ public class SmsTask extends AsyncTask<Void, Message, Boolean> {
         } else {
             execute();
         }
-    }
-
-    public static String getUserPhone(Context context){
-        TelephonyManager telemamanger = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        return telemamanger.getLine1Number();
     }
 }

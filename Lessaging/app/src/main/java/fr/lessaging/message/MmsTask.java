@@ -87,7 +87,7 @@ public class MmsTask extends AsyncTask<Void, Message, Boolean> {
                     long mmsId = allMms.getLong(allMms.getColumnIndexOrThrow("_id"));
                     int read = allMms.getInt(allMms.getColumnIndexOrThrow("read"));
                     String senderAdd = getAddressNumber(mmsId);
-                    if(senderAdd == null) senderAdd = SmsTask.getUserPhone(context);
+                    if(senderAdd == null) senderAdd = MessageManager.getUserPhone(context);
 //                        Log.v("LHEIDO SMS LOG MMS", "_id = "+mmsId+",\n sender = "+senderAdd);
                     Message mms = getMMSData(mmsId, senderAdd);
                     long date = allMms.getLong(allMms.getColumnIndex("date"));
@@ -102,7 +102,7 @@ public class MmsTask extends AsyncTask<Void, Message, Boolean> {
                 if(count == 0 && last_sms == -1){
                     Time now = new Time();
                     now.setToNow();
-                    Message sms = new Message(-1L, "Pas de mms", "1", 0, now);
+                    Message sms = new Message(-1L, "Pas de mms", "1", 0,"1", now);
                     publishProgress(sms);
                 }
                 publishProgress();

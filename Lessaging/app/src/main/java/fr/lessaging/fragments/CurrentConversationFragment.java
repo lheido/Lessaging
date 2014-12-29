@@ -236,15 +236,17 @@ public class CurrentConversationFragment extends Fragment implements ViewPager.O
                     Message newSms = new Message();
                     newSms.setBody(body);
                     newSms.setRead(false);
+                    newSms.setSender(MessageManager.getUserPhone(getActivity().getApplicationContext()));
                     Time now = new Time();
                     now.setToNow();
                     newSms.setDate(now);
+                    newSms.setType(2);
                     long threadId = Conversation.getOrCreateThreadId(getActivity().getApplicationContext(), conversation.getPhone());
                     MessageManager.store(getActivity().getApplicationContext(), conversation.getPhone(), newSms, threadId);
                     MessageManager.send(getActivity().getApplicationContext(), newSms, conversation.getPhone());
                     ConversationsList.moveConversationToTop(conversation);
                     mEditText.setText(R.string.empty_sms);
-                    ((SmsFragment) mPages.get(PAGE_SMS)).userAddSms(newSms.getId(), body, newSms.getSender(), 32, now, 0);
+                    ((SmsFragment) mPages.get(PAGE_SMS)).userAddSms(newSms, 0);
                 } else {
                     Toast.makeText(getActivity().getApplicationContext(), R.string.empty_message, Toast.LENGTH_LONG).show();
                 }

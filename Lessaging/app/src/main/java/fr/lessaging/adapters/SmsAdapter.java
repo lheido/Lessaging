@@ -54,7 +54,8 @@ public class SmsAdapter extends SmsBaseAdapter {
             ", compare="+PhoneNumberUtils.compare(mPhoneContact, message.getSender())
             );
         }
-        if(!PhoneNumberUtils.compare(mPhoneContact, message.getSender())) {
+//        if(!PhoneNumberUtils.compare(mPhoneContact, message.getSender())) {
+        if(message.getType() == 2) {
             holder.mLayout.setGravity(GravityCompat.END);
             holder.mLayout.setPadding(42, 0, 0, 0);
             holder.mBody.setBackgroundColor(mContext.getResources().getColor(R.color.grey_mid_high));

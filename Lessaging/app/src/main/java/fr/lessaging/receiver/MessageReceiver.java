@@ -85,9 +85,6 @@ public class MessageReceiver extends BroadcastReceiver {
         } else if(action.equals(MessageManager.ACTION_SENT_SMS)){
             switch(getResultCode()){
                 case Activity.RESULT_OK:
-                    Toast.makeText(context, "SMS sent",
-                            Toast.LENGTH_SHORT).show();
-                    errorVibration(context);
                     break;
                 case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                     Toast.makeText(context, "Generic failure",
@@ -131,7 +128,7 @@ public class MessageReceiver extends BroadcastReceiver {
                     long date = messages[0].getTimestampMillis();
                     String phone = messages[0].getDisplayOriginatingAddress();
                     String senderName = Conversation.retrieveContactName(context, phone);
-                    Message newMessage = new Message(-1, body, phone, 1, date);
+                    Message newMessage = new Message(-1, body, phone, 1,"1", date);
                     LessagingVibrator.notification(context);
                     String toastMessage = String.format(context.getResources().getString(R.string.receive_new_sms_toast), senderName);
                     Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show();

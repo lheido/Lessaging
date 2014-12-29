@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.provider.Telephony;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -60,7 +62,7 @@ public class MessageManager {
             values.put("address", sms.getSender());
             values.put("body", sms.getBody());
             values.put("read", false);
-            values.put("type", (!PhoneNumberUtils.compare(phoneContact, sms.getSender())) ? 2 : 1);
+            values.put("type", sms.getType());
             values.put("status", 32);
             if(thread_id != -1)
                 values.put("thread_id", thread_id);
@@ -74,6 +76,11 @@ public class MessageManager {
         } catch (Exception ex) {
             Toast.makeText(context, "store_sms\n" + ex.toString(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    public static String getUserPhone(Context context){
+        TelephonyManager telemamanger = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        return telemamanger.getLine1Number();
     }
 
 }
